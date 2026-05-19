@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     database_max_overflow: int = 20
 
     # AI Provider
-    default_llm_provider: LLMProvider = LLMProvider.openai
+    default_llm_provider: LLMProvider = LLMProvider.ollama
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     anthropic_api_key: str = ""

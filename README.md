@@ -2,7 +2,7 @@
 
 AI-powered SQL review platform. Paste a query, get deterministic anti-pattern analysis, EXPLAIN ANALYZE bottleneck detection, and LLM-generated explanations with rewrite suggestions — all in one structured review.
 
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi) ![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=nextdotjs) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql) ![Tests](https://img.shields.io/badge/tests-106%20passing-brightgreen?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi) ![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=nextdotjs) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql) ![Tests](https://img.shields.io/badge/tests-118%20passing-brightgreen?style=flat-square)
 
 ## What it does
 
@@ -27,18 +27,22 @@ AI is never the primary analysis engine. It explains and educates on top of dete
 
 ### With Docker Compose
 
-```bash
-# 1. Copy and fill in backend config
-cp backend/.env.example backend/.env
-# Set at least one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OLLAMA_BASE_URL
+The default AI provider is **Ollama** (local, no API key needed). On first run, Docker Compose automatically pulls the `llama3.1` model (~4.7 GB) before starting the backend. Subsequent starts are instant because the model is cached in a named volume.
 
-# 2. Start everything
+```bash
+# 1. Copy backend config (no changes needed for Ollama)
+cp backend/.env.example backend/.env
+
+# 2. Start everything (first run pulls the model — allow a few minutes)
 docker compose up --build
 
 # Backend:  http://localhost:8000
 # Frontend: http://localhost:3000
+# Ollama:   http://localhost:11434
 # API docs: http://localhost:8000/docs
 ```
+
+To use a cloud LLM instead, set `DEFAULT_LLM_PROVIDER=openai` (or `anthropic`) and add your API key in `backend/.env`.
 
 ### Local development
 
@@ -48,10 +52,10 @@ docker compose up --build
 cd backend
 pip install hatchling
 pip install -e ".[dev]"
-cp .env.example .env   # then fill in your API key
+cp .env.example .env
 
-# Start PostgreSQL
-docker compose up postgres -d
+# Start PostgreSQL + Ollama
+docker compose up postgres ollama ollama-init -d
 
 # Run migrations
 alembic upgrade head
@@ -188,12 +192,21 @@ Adding a new rule: create a class in `backend/app/analysis/anti_patterns/` imple
 
 ```bash
 cd backend
-pytest                   # all 106 tests
-pytest tests/unit/ -v    # with detail
-pytest -k "select_star"  # filter by name
+
+# Unit tests (no DB or API keys required)
+pytest tests/unit/ -v
+
+# Integration tests (requires PostgreSQL)
+INTEGRATION_TESTS=1 \
+  DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/querylens_test \
+  pytest tests/integration/ -v
+
+# All unit tests
+pytest tests/unit/              # 106 tests
+pytest -k "select_star"         # filter by name
 ```
 
-No running database or API keys required — execution plan tests use fixture JSON, and API tests use FastAPI `dependency_overrides`.
+Unit tests need no running database or API keys — execution plan tests use fixture JSON, and API tests use FastAPI `dependency_overrides`. Integration tests (12 tests) exercise the repository and endpoints against a real PostgreSQL instance.
 
 ## Project structure
 
