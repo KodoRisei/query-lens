@@ -25,7 +25,7 @@ configure_logging()
 
 TEST_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/querylens_test",
+    "postgresql+asyncpg://user:password@localhost:5432/querylens_test",
 )
 
 

@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: PostgresDsn = Field(  # type: ignore[assignment]
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/querylens"
+        default="postgresql+asyncpg://user:password@localhost:5432/querylens"
     )
     database_pool_size: int = 10
     database_max_overflow: int = 20

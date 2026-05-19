@@ -1,19 +1,36 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    build: ./postgres
+    container_name: querylens_postgres
+    restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: querylens
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U user"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  pgadmin4:
+    image: dpage/pgadmin4:8.14
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./config/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    depends_on:
+      - postgres
 
   ollama:
     image: ollama/ollama:latest
@@ -50,7 +67,7 @@ services:
       ollama-init:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/querylens
+      DATABASE_URL: postgresql+asyncpg://user:password@postgres:5432/querylens
       OLLAMA_BASE_URL: http://ollama:11434
     volumes:
       - ./backend:/app
@@ -67,4 +84,5 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
   ollama_data:
