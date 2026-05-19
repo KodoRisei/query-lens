@@ -8,7 +8,7 @@ from app.domain.models.analysis import AnalysisFinding, StaticAnalysisResult
 from app.domain.models.query import SQLQuery
 
 if TYPE_CHECKING:
-    from app.analysis.execution_plan.models import ExecutionPlanResult, PlanFinding
+    from app.analysis.execution_plan.models import ExecutionPlanResult
 
 
 class PromptBuilder:
@@ -62,9 +62,7 @@ class PromptBuilder:
 
         parts.append("")
         parts.append("## Task")
-        parts.append(
-            f"Review the query above. Focus: {MODE_FOCUS[query.review_mode]}"
-        )
+        parts.append(f"Review the query above. Focus: {MODE_FOCUS[query.review_mode]}")
         parts.append("")
         parts.append(RESPONSE_SCHEMA)
 
@@ -74,8 +72,7 @@ class PromptBuilder:
         lines = []
         for i, f in enumerate(findings, 1):
             lines.append(
-                f"{i}. **[{f.severity.upper()}] {f.title}** (`{f.rule_id}`)\n"
-                f"   {f.message}"
+                f"{i}. **[{f.severity.upper()}] {f.title}** (`{f.rule_id}`)\n   {f.message}"
             )
             if f.suggestion:
                 lines.append(f"   *Suggestion:* {f.suggestion}")
@@ -94,8 +91,7 @@ class PromptBuilder:
             lines.append("")
             for i, f in enumerate(plan_result.findings, 1):
                 lines.append(
-                    f"{i}. **[{f.severity.upper()}] {f.title}** (`{f.rule_id}`)\n"
-                    f"   {f.message}"
+                    f"{i}. **[{f.severity.upper()}] {f.title}** (`{f.rule_id}`)\n   {f.message}"
                 )
                 if f.suggestion:
                     lines.append(f"   *Suggestion:* {f.suggestion}")

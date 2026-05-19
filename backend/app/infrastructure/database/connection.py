@@ -1,6 +1,11 @@
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -11,7 +16,7 @@ _engine = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
-def get_engine():
+def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
         settings = get_settings()

@@ -1,8 +1,10 @@
+from typing import Any
+
 from app.analysis.execution_plan.models import ExecutionPlan, PlanNode
 from app.core.exceptions import ExecutionPlanError
 
 
-def parse_plan(raw: dict) -> ExecutionPlan:
+def parse_plan(raw: dict[str, Any]) -> ExecutionPlan:
     """
     Parse the top-level dict returned by EXPLAIN (FORMAT JSON).
 
@@ -28,7 +30,7 @@ def parse_plan(raw: dict) -> ExecutionPlan:
     )
 
 
-def _parse_node(raw: dict) -> PlanNode:
+def _parse_node(raw: dict[str, Any]) -> PlanNode:
     children = [_parse_node(child) for child in raw.get("Plans", [])]
 
     return PlanNode(

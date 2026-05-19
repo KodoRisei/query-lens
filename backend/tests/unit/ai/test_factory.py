@@ -4,7 +4,8 @@ from app.ai.factory import clear_provider_cache, get_provider
 from app.ai.providers.anthropic import AnthropicProvider
 from app.ai.providers.ollama import OllamaProvider
 from app.ai.providers.openai import OpenAIProvider
-from app.core.config import LLMProvider as LLMProviderName, Settings
+from app.core.config import LLMProvider as LLMProviderName
+from app.core.config import Settings
 from app.core.exceptions import LLMProviderNotConfigured
 
 
@@ -66,6 +67,7 @@ def test_same_instance_returned_on_second_call():
 
 def test_provider_satisfies_protocol():
     from app.ai.base import LLMProvider
+
     settings = settings_with()
     provider = get_provider(LLMProviderName.openai, settings=settings)
     assert isinstance(provider, LLMProvider)

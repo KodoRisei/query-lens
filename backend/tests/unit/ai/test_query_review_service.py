@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.ai.base import LLMResponse, Message
+from app.ai.base import LLMResponse
 from app.ai.prompts.builder import PromptBuilder
 from app.ai.response_parser import AIResponseParser
 from app.analysis.static_analyzer import StaticAnalyzer
@@ -32,12 +32,14 @@ def make_service(llm_content: str) -> QueryReviewService:
 
 
 def valid_llm_response(summary: str = "Looks good.", improved: str | None = None) -> str:
-    return json.dumps({
-        "summary": summary,
-        "improved_query": improved,
-        "findings": [],
-        "educational_note": None,
-    })
+    return json.dumps(
+        {
+            "summary": summary,
+            "improved_query": improved,
+            "findings": [],
+            "educational_note": None,
+        }
+    )
 
 
 @pytest.mark.asyncio
@@ -58,12 +60,20 @@ async def test_static_findings_populate_result():
 
 @pytest.mark.asyncio
 async def test_ai_findings_from_llm_response():
-    content = json.dumps({
-        "summary": "Found an issue.",
-        "improved_query": "SELECT id FROM users",
-        "findings": [{"rule_id": "select_star", "explanation": "Fetches all columns.", "suggestion": "List them."}],
-        "educational_note": None,
-    })
+    content = json.dumps(
+        {
+            "summary": "Found an issue.",
+            "improved_query": "SELECT id FROM users",
+            "findings": [
+                {
+                    "rule_id": "select_star",
+                    "explanation": "Fetches all columns.",
+                    "suggestion": "List them.",
+                }
+            ],
+            "educational_note": None,
+        }
+    )
     service = make_service(content)
     result = await service.review(SQLQuery("SELECT * FROM users"))
     assert any(f.rule_id == "select_star" for f in result.ai_review.findings)

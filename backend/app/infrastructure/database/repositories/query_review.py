@@ -1,5 +1,5 @@
 import uuid
-from dataclasses import asdict
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,7 +63,7 @@ def _to_orm(review: QueryReview) -> QueryReviewORM:
     )
 
 
-def _static_finding_to_dict(f) -> dict:
+def _static_finding_to_dict(f: Any) -> dict[str, Any]:
     return {
         "rule_id": f.rule_id,
         "severity": f.severity,
@@ -76,7 +76,7 @@ def _static_finding_to_dict(f) -> dict:
     }
 
 
-def _plan_finding_to_dict(f) -> dict:
+def _plan_finding_to_dict(f: Any) -> dict[str, Any]:
     return {
         "rule_id": f.rule_id,
         "node_type": f.node_type,
@@ -89,7 +89,7 @@ def _plan_finding_to_dict(f) -> dict:
     }
 
 
-def _ai_finding_to_dict(f) -> dict:
+def _ai_finding_to_dict(f: Any) -> dict[str, Any]:
     return {
         "rule_id": f.rule_id,
         "explanation": f.explanation,

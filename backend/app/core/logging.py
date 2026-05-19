@@ -33,7 +33,7 @@ def configure_logging() -> None:
         ]
 
     structlog.configure(
-        processors=processors,
+        processors=processors,  # type: ignore[arg-type]
         wrapper_class=structlog.make_filtering_bound_logger(
             logging.getLevelName(settings.log_level)
         ),
@@ -51,4 +51,4 @@ def configure_logging() -> None:
 
 
 def get_logger(name: str) -> structlog.BoundLogger:
-    return structlog.get_logger().bind(logger=name)
+    return structlog.get_logger().bind(logger=name)  # type: ignore[no-any-return]

@@ -4,7 +4,6 @@ from tests.unit.analysis.execution_plan.fixtures import (
     HASH_JOIN_WITH_SEQ_SCAN,
     INDEX_SCAN,
     SEQ_SCAN_LARGE,
-    SEQ_SCAN_SMALL,
 )
 
 
@@ -41,6 +40,7 @@ def test_custom_rule_injection():
 
 def test_has_analyze_data_propagated():
     from tests.unit.analysis.execution_plan.fixtures import NO_ANALYZE
+
     analyzer = ExecutionPlanAnalyzer()
     result = analyzer.analyze(NO_ANALYZE)
     assert result.has_analyze_data is False

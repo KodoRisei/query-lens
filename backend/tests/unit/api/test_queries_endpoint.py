@@ -1,7 +1,6 @@
-import json
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -15,13 +14,14 @@ from app.domain.models.analysis import (
     StaticAnalysisResult,
 )
 from app.domain.models.query import ReviewMode, SQLQuery
-from app.domain.models.review import AIFinding, AIReview, QueryReview
+from app.domain.models.review import AIReview, QueryReview
 from app.main import app
 
 BASE = "/api/v1/queries"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def make_review(sql: str = "SELECT id FROM users WHERE id = 1") -> QueryReview:
     return QueryReview(
@@ -83,6 +83,7 @@ def mock_repo_dep(review_id: uuid.UUID, review: QueryReview):
 
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_review_returns_201() -> None:
@@ -147,9 +148,7 @@ async def test_sql_parse_error_returns_422() -> None:
 @pytest.mark.asyncio
 async def test_llm_provider_error_returns_502() -> None:
     svc = MagicMock()
-    svc.review = AsyncMock(
-        side_effect=LLMProviderError(message="OpenAI failed", provider="openai")
-    )
+    svc.review = AsyncMock(side_effect=LLMProviderError(message="OpenAI failed", provider="openai"))
 
     app.dependency_overrides[get_review_service] = lambda: svc
     app.dependency_overrides[get_review_repository] = lambda: MagicMock()

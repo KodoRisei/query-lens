@@ -20,44 +20,48 @@ class MissingWhereRule(AntiPatternRule):
         for delete in ast.find_all(exp.Delete):
             if not delete.args.get("where"):
                 table = self._table_name(delete)
-                findings.append(AnalysisFinding(
-                    rule_id=self.rule_id,
-                    severity=Severity.critical,
-                    category=FindingCategory.correctness,
-                    title="DELETE without WHERE clause",
-                    message=(
-                        f"DELETE FROM {table} has no WHERE clause and will remove "
-                        "every row in the table. This cannot be undone without a backup."
-                    ),
-                    suggestion=(
-                        "Add a WHERE clause to target specific rows. "
-                        "If you intend to truncate the table, use TRUNCATE instead — "
-                        "it is faster and its intent is explicit."
-                    ),
-                    line=delete.meta.get("line"),
-                    column=delete.meta.get("col"),
-                ))
+                findings.append(
+                    AnalysisFinding(
+                        rule_id=self.rule_id,
+                        severity=Severity.critical,
+                        category=FindingCategory.correctness,
+                        title="DELETE without WHERE clause",
+                        message=(
+                            f"DELETE FROM {table} has no WHERE clause and will remove "
+                            "every row in the table. This cannot be undone without a backup."
+                        ),
+                        suggestion=(
+                            "Add a WHERE clause to target specific rows. "
+                            "If you intend to truncate the table, use TRUNCATE instead — "
+                            "it is faster and its intent is explicit."
+                        ),
+                        line=delete.meta.get("line"),
+                        column=delete.meta.get("col"),
+                    )
+                )
 
         for update in ast.find_all(exp.Update):
             if not update.args.get("where"):
                 table = self._table_name(update)
-                findings.append(AnalysisFinding(
-                    rule_id=self.rule_id,
-                    severity=Severity.critical,
-                    category=FindingCategory.correctness,
-                    title="UPDATE without WHERE clause",
-                    message=(
-                        f"UPDATE {table} has no WHERE clause and will modify "
-                        "every row in the table."
-                    ),
-                    suggestion=(
-                        "Add a WHERE clause to target specific rows. "
-                        "Consider wrapping in a transaction so you can verify "
-                        "the affected row count before committing."
-                    ),
-                    line=update.meta.get("line"),
-                    column=update.meta.get("col"),
-                ))
+                findings.append(
+                    AnalysisFinding(
+                        rule_id=self.rule_id,
+                        severity=Severity.critical,
+                        category=FindingCategory.correctness,
+                        title="UPDATE without WHERE clause",
+                        message=(
+                            f"UPDATE {table} has no WHERE clause and will modify "
+                            "every row in the table."
+                        ),
+                        suggestion=(
+                            "Add a WHERE clause to target specific rows. "
+                            "Consider wrapping in a transaction so you can verify "
+                            "the affected row count before committing."
+                        ),
+                        line=update.meta.get("line"),
+                        column=update.meta.get("col"),
+                    )
+                )
 
         return findings
 

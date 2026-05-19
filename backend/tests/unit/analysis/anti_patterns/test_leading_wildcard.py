@@ -36,9 +36,7 @@ def test_ilike_leading_wildcard_flagged():
 
 
 def test_multiple_like_in_query():
-    findings = check(
-        "SELECT * FROM users WHERE first LIKE '%alice' OR last LIKE 'smith%'"
-    )
+    findings = check("SELECT * FROM users WHERE first LIKE '%alice' OR last LIKE 'smith%'")
     # Only the first LIKE has a leading wildcard
     assert len(findings) == 1
 

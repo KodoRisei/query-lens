@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Any
 
 from app.ai.base import LLMResponse
 from app.core.logging import get_logger
@@ -43,10 +44,10 @@ class AIResponseParser:
             )
             return self._fallback(response, raw)
 
-    def _extract_json(self, text: str) -> dict | None:
+    def _extract_json(self, text: str) -> dict[str, Any] | None:
         # Try bare JSON first (most common with json_object response format)
         try:
-            return json.loads(text)
+            return json.loads(text)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             pass
 
@@ -54,7 +55,7 @@ class AIResponseParser:
         match = _JSON_FENCE_RE.search(text)
         if match:
             try:
-                return json.loads(match.group(1).strip())
+                return json.loads(match.group(1).strip())  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 pass
 
@@ -62,7 +63,7 @@ class AIResponseParser:
 
     def _build_review(
         self,
-        data: dict,
+        data: dict[str, Any],
         response: LLMResponse,
         analysis: StaticAnalysisResult,
     ) -> AIReview:

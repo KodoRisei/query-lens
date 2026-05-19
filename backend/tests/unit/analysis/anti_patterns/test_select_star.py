@@ -44,7 +44,5 @@ def test_subquery_star_flagged():
 
 
 def test_cte_star_flagged():
-    findings = check(
-        "WITH cte AS (SELECT * FROM orders) SELECT id FROM cte"
-    )
+    findings = check("WITH cte AS (SELECT * FROM orders) SELECT id FROM cte")
     assert len(findings) == 1

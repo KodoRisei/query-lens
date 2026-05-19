@@ -5,6 +5,7 @@ The AI service is mocked so no LLM API key is required.
 Run with:
     INTEGRATION_TESTS=1 DATABASE_URL=postgresql+asyncpg://... pytest tests/integration/test_api_integration.py
 """
+
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
@@ -102,15 +103,11 @@ async def test_get_unknown_id_returns_404(api_client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_multiple_posts_create_independent_records(api_client: AsyncClient) -> None:
-    app.dependency_overrides[get_review_service] = lambda: _mock_service(
-        _make_review("SELECT 1")
-    )
+    app.dependency_overrides[get_review_service] = lambda: _mock_service(_make_review("SELECT 1"))
     r1 = await api_client.post("/api/v1/queries/review", json={"sql": "SELECT 1"})
     app.dependency_overrides.pop(get_review_service, None)
 
-    app.dependency_overrides[get_review_service] = lambda: _mock_service(
-        _make_review("SELECT 2")
-    )
+    app.dependency_overrides[get_review_service] = lambda: _mock_service(_make_review("SELECT 2"))
     r2 = await api_client.post("/api/v1/queries/review", json={"sql": "SELECT 2"})
     app.dependency_overrides.pop(get_review_service, None)
 
@@ -123,9 +120,7 @@ async def test_multiple_posts_create_independent_records(api_client: AsyncClient
 async def test_review_mode_stored_correctly(api_client: AsyncClient) -> None:
     review = QueryReview(
         query=SQLQuery(sql="SELECT 1", review_mode=ReviewMode.junior),
-        static_analysis=StaticAnalysisResult(
-            findings=[], query_type="SELECT", table_references=[]
-        ),
+        static_analysis=StaticAnalysisResult(findings=[], query_type="SELECT", table_references=[]),
         ai_review=AIReview(
             summary="Keep it simple.",
             findings=[],

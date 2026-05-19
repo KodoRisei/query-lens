@@ -27,24 +27,26 @@ class ImplicitCrossJoinRule(AntiPatternRule):
             if is_cross and not has_on and not has_using:
                 joined_table = join.find(exp.Table)
                 table_name = joined_table.name if joined_table else "unknown"
-                findings.append(AnalysisFinding(
-                    rule_id=self.rule_id,
-                    severity=Severity.warning,
-                    category=FindingCategory.performance,
-                    title=f"Cartesian product with '{table_name}'",
-                    message=(
-                        f"The join with '{table_name}' has no ON or USING condition, "
-                        "producing a cartesian product. Every row in one table is "
-                        "paired with every row in the other. This grows as O(n×m)."
-                    ),
-                    suggestion=(
-                        "Add an explicit JOIN condition: "
-                        f"JOIN {table_name} ON a.id = {table_name}.a_id. "
-                        "If the cross product is intentional, use CROSS JOIN explicitly "
-                        "and add a comment explaining the intent."
-                    ),
-                    line=join.meta.get("line"),
-                    column=join.meta.get("col"),
-                ))
+                findings.append(
+                    AnalysisFinding(
+                        rule_id=self.rule_id,
+                        severity=Severity.warning,
+                        category=FindingCategory.performance,
+                        title=f"Cartesian product with '{table_name}'",
+                        message=(
+                            f"The join with '{table_name}' has no ON or USING condition, "
+                            "producing a cartesian product. Every row in one table is "
+                            "paired with every row in the other. This grows as O(n×m)."
+                        ),
+                        suggestion=(
+                            "Add an explicit JOIN condition: "
+                            f"JOIN {table_name} ON a.id = {table_name}.a_id. "
+                            "If the cross product is intentional, use CROSS JOIN explicitly "
+                            "and add a comment explaining the intent."
+                        ),
+                        line=join.meta.get("line"),
+                        column=join.meta.get("col"),
+                    )
+                )
 
         return findings

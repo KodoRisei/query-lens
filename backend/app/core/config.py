@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
     # Database
-    database_url: PostgresDsn = Field(
+    database_url: PostgresDsn = Field(  # type: ignore[assignment]
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/querylens"
     )
     database_pool_size: int = 10

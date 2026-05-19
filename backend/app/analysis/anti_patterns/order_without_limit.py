@@ -29,25 +29,27 @@ class OrderWithoutLimitRule(AntiPatternRule):
 
             if has_order and not has_limit and not has_group_by:
                 order_node = select.args["order"]
-                findings.append(AnalysisFinding(
-                    rule_id=self.rule_id,
-                    severity=Severity.warning,
-                    category=FindingCategory.performance,
-                    title="ORDER BY without LIMIT",
-                    message=(
-                        "Sorting the full result set without a LIMIT forces PostgreSQL to "
-                        "complete the entire sort before returning any rows. On large tables "
-                        "this can be slow and memory-intensive. The caller also receives "
-                        "an unbounded result set."
-                    ),
-                    suggestion=(
-                        "Add LIMIT N to cap the result set. "
-                        "If you genuinely need all rows sorted, consider whether the "
-                        "sort can be deferred to the application layer or whether a "
-                        "cursor-based approach (keyset pagination) is more appropriate."
-                    ),
-                    line=order_node.meta.get("line"),
-                    column=order_node.meta.get("col"),
-                ))
+                findings.append(
+                    AnalysisFinding(
+                        rule_id=self.rule_id,
+                        severity=Severity.warning,
+                        category=FindingCategory.performance,
+                        title="ORDER BY without LIMIT",
+                        message=(
+                            "Sorting the full result set without a LIMIT forces PostgreSQL to "
+                            "complete the entire sort before returning any rows. On large tables "
+                            "this can be slow and memory-intensive. The caller also receives "
+                            "an unbounded result set."
+                        ),
+                        suggestion=(
+                            "Add LIMIT N to cap the result set. "
+                            "If you genuinely need all rows sorted, consider whether the "
+                            "sort can be deferred to the application layer or whether a "
+                            "cursor-based approach (keyset pagination) is more appropriate."
+                        ),
+                        line=order_node.meta.get("line"),
+                        column=order_node.meta.get("col"),
+                    )
+                )
 
         return findings

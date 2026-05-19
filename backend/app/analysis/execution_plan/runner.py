@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,7 +28,7 @@ class ExplainAnalyzeRunner:
         self._session = session
         self._timeout_seconds = timeout_seconds
 
-    async def run(self, sql: str, query_type: str = "SELECT") -> dict:
+    async def run(self, sql: str, query_type: str = "SELECT") -> dict[str, Any]:
         use_analyze = query_type not in _DML_TYPES
         options = "ANALYZE, BUFFERS, FORMAT JSON" if use_analyze else "FORMAT JSON"
         explain_sql = f"EXPLAIN ({options}) {sql}"
@@ -43,7 +44,7 @@ class ExplainAnalyzeRunner:
                 self._session.execute(text(explain_sql)),
                 timeout=self._timeout_seconds,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             raise ExecutionPlanError(
                 message=f"EXPLAIN ANALYZE timed out after {self._timeout_seconds}s.",
                 details={"timeout_seconds": self._timeout_seconds},
@@ -59,5 +60,5 @@ class ExplainAnalyzeRunner:
         # asyncpg returns PostgreSQL JSON as a Python object.
         # EXPLAIN FORMAT JSON produces a list with one element.
         if isinstance(plan_data, list):
-            return plan_data[0]
-        return plan_data
+            return plan_data[0]  # type: ignore[no-any-return]
+        return plan_data  # type: ignore[no-any-return]

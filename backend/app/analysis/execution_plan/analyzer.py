@@ -1,3 +1,5 @@
+from typing import Any
+
 from app.analysis.execution_plan.models import (
     ExecutionPlan,
     ExecutionPlanResult,
@@ -6,7 +8,6 @@ from app.analysis.execution_plan.models import (
 )
 from app.analysis.execution_plan.parser import parse_plan
 from app.analysis.execution_plan.rules import PLAN_RULE_REGISTRY, PlanRule
-from app.core.exceptions import ExecutionPlanError
 
 
 class ExecutionPlanAnalyzer:
@@ -20,7 +21,7 @@ class ExecutionPlanAnalyzer:
     def __init__(self, rules: list[PlanRule] | None = None) -> None:
         self._rules = rules if rules is not None else PLAN_RULE_REGISTRY
 
-    def analyze(self, raw_plan: dict) -> ExecutionPlanResult:
+    def analyze(self, raw_plan: dict[str, Any]) -> ExecutionPlanResult:
         plan = parse_plan(raw_plan)
         findings: list[PlanFinding] = []
         self._walk(plan.root, plan, findings)

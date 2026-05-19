@@ -28,9 +28,8 @@ def test_invalid_sql_raises_parse_error():
 
 def test_query_too_long_raises_error(monkeypatch):
     from app.core import config as cfg
-    settings = cfg.get_settings()
-    original = settings.max_query_length
 
+    settings = cfg.get_settings()
     monkeypatch.setattr(settings, "max_query_length", 10)
     with pytest.raises(QueryTooLongError) as exc_info:
         StaticAnalyzer().analyze(SQLQuery("SELECT id FROM users WHERE id = 1"))

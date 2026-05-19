@@ -29,7 +29,7 @@ def parse(sql: str, dialect: str = "") -> exp.Expression:
     except SqlglotError as exc:
         raise SQLParseError(message=f"SQL parsing error: {exc}") from exc
 
-    return ast
+    return ast  # type: ignore[return-value]
 
 
 def extract_query_type(ast: exp.Expression) -> str:

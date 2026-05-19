@@ -6,6 +6,7 @@ Set INTEGRATION_TESTS=1 to enable them:
 
     INTEGRATION_TESTS=1 DATABASE_URL=postgresql+asyncpg://... pytest tests/integration/
 """
+
 import os
 from collections.abc import AsyncGenerator
 
@@ -63,6 +64,7 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 @pytest_asyncio.fixture
 async def api_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """HTTP test client with the test DB session injected into all Depends."""
+
     async def override_db() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
 

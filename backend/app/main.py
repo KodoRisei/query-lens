@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -23,7 +24,7 @@ logger = structlog.get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logger.info(
         "application.startup",
@@ -93,9 +94,7 @@ def _register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(LLMProviderError)
-    async def llm_provider_error_handler(
-        request: Request, exc: LLMProviderError
-    ) -> JSONResponse:
+    async def llm_provider_error_handler(request: Request, exc: LLMProviderError) -> JSONResponse:
         logger.error(
             "llm.provider.error",
             provider=exc.provider,
@@ -108,9 +107,7 @@ def _register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(QueryLensError)
-    async def generic_domain_error_handler(
-        request: Request, exc: QueryLensError
-    ) -> JSONResponse:
+    async def generic_domain_error_handler(request: Request, exc: QueryLensError) -> JSONResponse:
         logger.error("domain.error", message=exc.message, details=exc.details)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

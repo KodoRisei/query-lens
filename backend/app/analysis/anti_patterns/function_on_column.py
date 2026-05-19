@@ -47,26 +47,28 @@ class FunctionOnColumnRule(AntiPatternRule):
 
                 if isinstance(primary_arg, exp.Column):
                     col_name = primary_arg.name or "column"
-                    findings.append(AnalysisFinding(
-                        rule_id=self.rule_id,
-                        severity=Severity.warning,
-                        category=FindingCategory.performance,
-                        title=f"Non-sargable predicate: {func_name}({col_name})",
-                        message=(
-                            f"Wrapping '{col_name}' in {func_name}() inside the WHERE clause "
-                            "prevents the database from using any B-tree index on that column. "
-                            "PostgreSQL must compute the function for every row in the table."
-                        ),
-                        suggestion=(
-                            f"Consider a functional index: "
-                            f"CREATE INDEX ON table ({func_name}({col_name})). "
-                            "Alternatively, restructure the predicate to isolate the column: "
-                            f"instead of WHERE {func_name}({col_name}) = val, use a range "
-                            "condition or store the pre-computed value."
-                        ),
-                        line=func.meta.get("line"),
-                        column=func.meta.get("col"),
-                    ))
+                    findings.append(
+                        AnalysisFinding(
+                            rule_id=self.rule_id,
+                            severity=Severity.warning,
+                            category=FindingCategory.performance,
+                            title=f"Non-sargable predicate: {func_name}({col_name})",
+                            message=(
+                                f"Wrapping '{col_name}' in {func_name}() inside the WHERE clause "
+                                "prevents the database from using any B-tree index on that column. "
+                                "PostgreSQL must compute the function for every row in the table."
+                            ),
+                            suggestion=(
+                                f"Consider a functional index: "
+                                f"CREATE INDEX ON table ({func_name}({col_name})). "
+                                "Alternatively, restructure the predicate to isolate the column: "
+                                f"instead of WHERE {func_name}({col_name}) = val, use a range "
+                                "condition or store the pre-computed value."
+                            ),
+                            line=func.meta.get("line"),
+                            column=func.meta.get("col"),
+                        )
+                    )
 
         return findings
 

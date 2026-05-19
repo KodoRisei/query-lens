@@ -4,12 +4,18 @@ Integration tests for QueryReviewRepository against a real PostgreSQL database.
 Run with:
     INTEGRATION_TESTS=1 DATABASE_URL=postgresql+asyncpg://... pytest tests/integration/test_repository.py
 """
+
 import uuid
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.models.analysis import AnalysisFinding, FindingCategory, Severity, StaticAnalysisResult
+from app.domain.models.analysis import (
+    AnalysisFinding,
+    FindingCategory,
+    Severity,
+    StaticAnalysisResult,
+)
 from app.domain.models.query import ReviewMode, SQLQuery
 from app.domain.models.review import AIFinding, AIReview, QueryReview
 from app.infrastructure.database.repositories.query_review import QueryReviewRepository

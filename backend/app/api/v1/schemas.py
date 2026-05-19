@@ -5,18 +5,25 @@ from pydantic import BaseModel, Field
 
 from app.core.config import LLMProvider as LLMProviderName
 from app.domain.models.query import ReviewMode
-
+from app.domain.models.review import QueryReview
+from app.infrastructure.database.models import QueryReviewORM
 
 # ── Request ───────────────────────────────────────────────────────────────────
 
+
 class ReviewRequest(BaseModel):
     sql: str = Field(..., min_length=1, max_length=50_000, description="SQL query to review")
-    dialect: str = Field(default="", pattern=r"^[a-z_]*$", description="sqlglot dialect (empty = generic SQL)")
+    dialect: str = Field(
+        default="", pattern=r"^[a-z_]*$", description="sqlglot dialect (empty = generic SQL)"
+    )
     review_mode: ReviewMode = Field(default=ReviewMode.senior)
-    provider: LLMProviderName | None = Field(default=None, description="Override default LLM provider")
+    provider: LLMProviderName | None = Field(
+        default=None, description="Override default LLM provider"
+    )
 
 
 # ── Response building blocks ──────────────────────────────────────────────────
+
 
 class StaticFindingResponse(BaseModel):
     rule_id: str
@@ -86,7 +93,7 @@ class QueryReviewResponse(BaseModel):
     @classmethod
     def from_domain(
         cls,
-        review,          # QueryReview domain object
+        review: QueryReview,
         record_id: uuid.UUID,
         created_at: datetime,
     ) -> "QueryReviewResponse":
@@ -139,7 +146,8 @@ class QueryReviewResponse(BaseModel):
                         for f in plan.findings
                     ],
                 )
-                if plan else None
+                if plan
+                else None
             ),
             ai_review=AIReviewResponse(
                 summary=ai.summary,
@@ -161,7 +169,7 @@ class QueryReviewResponse(BaseModel):
         )
 
     @classmethod
-    def from_orm_record(cls, record) -> "QueryReviewResponse":
+    def from_orm_record(cls, record: QueryReviewORM) -> "QueryReviewResponse":
         """Reconstruct a response from a persisted ORM record."""
         return cls(
             id=record.id,
@@ -173,9 +181,15 @@ class QueryReviewResponse(BaseModel):
                 query_type=record.static_query_type or "UNKNOWN",
                 table_references=record.static_table_refs or [],
                 findings=[StaticFindingResponse(**f) for f in (record.static_findings or [])],
-                critical_count=sum(1 for f in (record.static_findings or []) if f.get("severity") == "critical"),
-                warning_count=sum(1 for f in (record.static_findings or []) if f.get("severity") == "warning"),
-                info_count=sum(1 for f in (record.static_findings or []) if f.get("severity") == "info"),
+                critical_count=sum(
+                    1 for f in (record.static_findings or []) if f.get("severity") == "critical"
+                ),
+                warning_count=sum(
+                    1 for f in (record.static_findings or []) if f.get("severity") == "warning"
+                ),
+                info_count=sum(
+                    1 for f in (record.static_findings or []) if f.get("severity") == "info"
+                ),
             ),
             execution_plan=(
                 ExecutionPlanResponse(
@@ -184,7 +198,8 @@ class QueryReviewResponse(BaseModel):
                     has_analyze_data=record.plan_has_analyze_data or False,
                     findings=[PlanFindingResponse(**f) for f in (record.plan_findings or [])],
                 )
-                if record.plan_findings is not None else None
+                if record.plan_findings is not None
+                else None
             ),
             ai_review=AIReviewResponse(
                 summary=record.ai_summary or "",

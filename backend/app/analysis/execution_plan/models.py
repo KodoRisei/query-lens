@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from app.domain.models.analysis import FindingCategory, Severity
 
@@ -19,7 +20,7 @@ class PlanNode:
     shared_hit_blocks: int = 0
     shared_read_blocks: int = 0
     children: list["PlanNode"] = field(default_factory=list)
-    raw: dict = field(default_factory=dict, repr=False)
+    raw: dict[str, Any] = field(default_factory=dict, repr=False)
 
     @property
     def has_analyze_data(self) -> bool:

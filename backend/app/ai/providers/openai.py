@@ -46,7 +46,7 @@ class OpenAIProvider:
         max_tokens: int = 2048,
     ) -> LLMResponse:
         try:
-            response = await self._client.chat.completions.create(
+            response = await self._client.chat.completions.create(  # type: ignore[call-overload]
                 model=self._model,
                 messages=[{"role": m.role, "content": m.content} for m in messages],
                 temperature=temperature,

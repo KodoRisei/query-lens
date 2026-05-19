@@ -2,7 +2,7 @@ from app.analysis.anti_patterns import RULE_REGISTRY
 from app.analysis.anti_patterns.base import AntiPatternRule
 from app.analysis.parser import extract_query_type, extract_table_references, parse
 from app.core.config import get_settings
-from app.core.exceptions import QueryTooLongError, SQLParseError
+from app.core.exceptions import QueryTooLongError
 from app.domain.models.analysis import StaticAnalysisResult
 from app.domain.models.query import SQLQuery
 

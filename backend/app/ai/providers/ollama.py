@@ -52,7 +52,7 @@ class OllamaProvider:
         try:
             response = await self._client.chat.completions.create(
                 model=self._model,
-                messages=[{"role": m.role, "content": m.content} for m in messages],
+                messages=[{"role": m.role, "content": m.content} for m in messages],  # type: ignore[misc]
                 temperature=temperature,
                 max_tokens=max_tokens,
                 # Ollama's JSON mode support depends on the model; omit response_format
@@ -61,7 +61,7 @@ class OllamaProvider:
         except openai.APIConnectionError as exc:
             raise LLMProviderError(
                 message=(
-                    f"Cannot reach Ollama at the configured URL. "
+                    "Cannot reach Ollama at the configured URL. "
                     "Ensure Ollama is running and OLLAMA_BASE_URL is correct."
                 ),
                 provider=self.provider_name,

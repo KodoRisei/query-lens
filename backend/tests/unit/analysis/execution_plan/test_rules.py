@@ -16,8 +16,8 @@ from tests.unit.analysis.execution_plan.fixtures import (
     SORT_WITHOUT_INDEX,
 )
 
-
 # ── SeqScanRule ──────────────────────────────────────────────────────────────
+
 
 def test_seq_scan_large_flagged():
     plan = parse_plan(SEQ_SCAN_LARGE)
@@ -53,6 +53,7 @@ def test_seq_scan_without_analyze_uses_plan_rows():
 
 # ── RowEstimationRule ─────────────────────────────────────────────────────────
 
+
 def test_poor_row_estimate_flagged():
     plan = parse_plan(POOR_ROW_ESTIMATE)
     rule = RowEstimationRule()
@@ -78,6 +79,7 @@ def test_row_estimation_without_analyze_not_flagged():
 
 # ── ExpensiveSortRule ─────────────────────────────────────────────────────────
 
+
 def test_expensive_sort_flagged():
     plan = parse_plan(SORT_WITHOUT_INDEX)
     root = plan.root  # This IS the Sort node
@@ -95,6 +97,7 @@ def test_non_sort_node_not_flagged():
 
 
 # ── NestedLoopRule ────────────────────────────────────────────────────────────
+
 
 def test_nested_loop_large_flagged():
     plan = parse_plan(NESTED_LOOP_LARGE)

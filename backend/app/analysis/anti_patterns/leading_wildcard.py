@@ -25,25 +25,27 @@ class LeadingWildcardRule(AntiPatternRule):
             pattern_str: str = pattern.this
             if pattern_str.startswith("%"):
                 operator = "ILIKE" if isinstance(like_node, exp.ILike) else "LIKE"
-                findings.append(AnalysisFinding(
-                    rule_id=self.rule_id,
-                    severity=Severity.warning,
-                    category=FindingCategory.performance,
-                    title=f"Leading wildcard in {operator} pattern",
-                    message=(
-                        f"The pattern '{pattern_str}' starts with '%', which forces "
-                        "the database to scan every row. A B-tree index on the column "
-                        "cannot be used for prefix matching in this direction."
-                    ),
-                    suggestion=(
-                        "If you need full-text search, consider a GIN index with "
-                        "pg_trgm (trigram matching) which supports leading wildcards efficiently: "
-                        "CREATE INDEX ON table USING gin(column gin_trgm_ops). "
-                        "If you control the data format, restructure so the searchable "
-                        "part is a prefix, enabling LIKE 'value%' instead."
-                    ),
-                    line=like_node.meta.get("line"),
-                    column=like_node.meta.get("col"),
-                ))
+                findings.append(
+                    AnalysisFinding(
+                        rule_id=self.rule_id,
+                        severity=Severity.warning,
+                        category=FindingCategory.performance,
+                        title=f"Leading wildcard in {operator} pattern",
+                        message=(
+                            f"The pattern '{pattern_str}' starts with '%', which forces "
+                            "the database to scan every row. A B-tree index on the column "
+                            "cannot be used for prefix matching in this direction."
+                        ),
+                        suggestion=(
+                            "If you need full-text search, consider a GIN index with "
+                            "pg_trgm (trigram matching) which supports leading wildcards efficiently: "
+                            "CREATE INDEX ON table USING gin(column gin_trgm_ops). "
+                            "If you control the data format, restructure so the searchable "
+                            "part is a prefix, enabling LIKE 'value%' instead."
+                        ),
+                        line=like_node.meta.get("line"),
+                        column=like_node.meta.get("col"),
+                    )
+                )
 
         return findings

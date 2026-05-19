@@ -52,7 +52,7 @@ class AnthropicProvider:
             response = await self._client.messages.create(
                 model=self._model,
                 system=system,
-                messages=[{"role": m.role, "content": m.content} for m in user_messages],
+                messages=[{"role": m.role, "content": m.content} for m in user_messages],  # type: ignore[typeddict-item]
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
@@ -94,8 +94,6 @@ class AnthropicProvider:
         )
 
     def _split_messages(self, messages: list[Message]) -> tuple[str, list[Message]]:
-        system = next(
-            (m.content for m in messages if m.role == "system"), ""
-        )
+        system = next((m.content for m in messages if m.role == "system"), "")
         non_system = [m for m in messages if m.role != "system"]
         return system, non_system

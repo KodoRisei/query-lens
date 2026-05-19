@@ -33,24 +33,26 @@ class SeqScanRule(PlanRule):
             return []
 
         table = node.relation_name or "unknown"
-        return [PlanFinding(
-            rule_id=self.rule_id,
-            node_type=node.node_type,
-            severity=Severity.warning,
-            category=FindingCategory.performance,
-            title=f"Sequential scan on '{table}' ({rows:,} rows)",
-            message=(
-                f"PostgreSQL is reading every row in '{table}' ({rows:,} rows). "
-                "Sequential scans are appropriate for small tables or when fetching most rows, "
-                "but on large tables with selective WHERE conditions they indicate a missing index."
-            ),
-            suggestion=(
-                f"Identify the columns used in WHERE / JOIN conditions on '{table}' "
-                f"and add an index: CREATE INDEX ON {table} (column_name). "
-                "Check pg_stat_user_indexes after to confirm the new index is used."
-            ),
-            relation_name=table,
-        )]
+        return [
+            PlanFinding(
+                rule_id=self.rule_id,
+                node_type=node.node_type,
+                severity=Severity.warning,
+                category=FindingCategory.performance,
+                title=f"Sequential scan on '{table}' ({rows:,} rows)",
+                message=(
+                    f"PostgreSQL is reading every row in '{table}' ({rows:,} rows). "
+                    "Sequential scans are appropriate for small tables or when fetching most rows, "
+                    "but on large tables with selective WHERE conditions they indicate a missing index."
+                ),
+                suggestion=(
+                    f"Identify the columns used in WHERE / JOIN conditions on '{table}' "
+                    f"and add an index: CREATE INDEX ON {table} (column_name). "
+                    "Check pg_stat_user_indexes after to confirm the new index is used."
+                ),
+                relation_name=table,
+            )
+        ]
 
 
 class RowEstimationRule(PlanRule):
@@ -83,24 +85,26 @@ class RowEstimationRule(PlanRule):
         direction = "under-estimated" if total > estimated else "over-estimated"
         label = node.relation_name or node.node_type
 
-        return [PlanFinding(
-            rule_id=self.rule_id,
-            node_type=node.node_type,
-            severity=Severity.warning,
-            category=FindingCategory.performance,
-            title=f"Row estimate {direction} for '{label}' ({ratio:.0f}×)",
-            message=(
-                f"PostgreSQL estimated {estimated:,} rows but got {total:,} — "
-                f"a {ratio:.0f}× error. Poor estimates cause the planner to choose "
-                "suboptimal join types (e.g. Nested Loop when Hash Join would be faster)."
-            ),
-            suggestion=(
-                "Run ANALYZE on the relevant tables to refresh statistics. "
-                "For heavily skewed columns, increase statistics target: "
-                "ALTER TABLE t ALTER COLUMN c SET STATISTICS 500."
-            ),
-            relation_name=node.relation_name,
-        )]
+        return [
+            PlanFinding(
+                rule_id=self.rule_id,
+                node_type=node.node_type,
+                severity=Severity.warning,
+                category=FindingCategory.performance,
+                title=f"Row estimate {direction} for '{label}' ({ratio:.0f}×)",
+                message=(
+                    f"PostgreSQL estimated {estimated:,} rows but got {total:,} — "
+                    f"a {ratio:.0f}× error. Poor estimates cause the planner to choose "
+                    "suboptimal join types (e.g. Nested Loop when Hash Join would be faster)."
+                ),
+                suggestion=(
+                    "Run ANALYZE on the relevant tables to refresh statistics. "
+                    "For heavily skewed columns, increase statistics target: "
+                    "ALTER TABLE t ALTER COLUMN c SET STATISTICS 500."
+                ),
+                relation_name=node.relation_name,
+            )
+        ]
 
 
 class ExpensiveSortRule(PlanRule):
@@ -122,23 +126,25 @@ class ExpensiveSortRule(PlanRule):
         if total_cost > 0 and node.total_cost / total_cost < self.COST_FRACTION_THRESHOLD:
             return []
 
-        return [PlanFinding(
-            rule_id=self.rule_id,
-            node_type=node.node_type,
-            severity=Severity.warning,
-            category=FindingCategory.performance,
-            title=f"Expensive sort (cost {node.total_cost:.0f})",
-            message=(
-                f"A Sort node contributes {node.total_cost / max(total_cost, 1) * 100:.0f}% "
-                "of total plan cost. PostgreSQL cannot use an index to satisfy the ORDER BY. "
-                "For large result sets this may spill to disk."
-            ),
-            suggestion=(
-                "Add an index on the ORDER BY column(s) to allow an Index Scan. "
-                "For paginated queries, prefer keyset (cursor) pagination to avoid sorting "
-                "the full result set on every page."
-            ),
-        )]
+        return [
+            PlanFinding(
+                rule_id=self.rule_id,
+                node_type=node.node_type,
+                severity=Severity.warning,
+                category=FindingCategory.performance,
+                title=f"Expensive sort (cost {node.total_cost:.0f})",
+                message=(
+                    f"A Sort node contributes {node.total_cost / max(total_cost, 1) * 100:.0f}% "
+                    "of total plan cost. PostgreSQL cannot use an index to satisfy the ORDER BY. "
+                    "For large result sets this may spill to disk."
+                ),
+                suggestion=(
+                    "Add an index on the ORDER BY column(s) to allow an Index Scan. "
+                    "For paginated queries, prefer keyset (cursor) pagination to avoid sorting "
+                    "the full result set on every page."
+                ),
+            )
+        ]
 
 
 class NestedLoopRule(PlanRule):
@@ -160,23 +166,25 @@ class NestedLoopRule(PlanRule):
         if loops < self.LOOP_THRESHOLD:
             return []
 
-        return [PlanFinding(
-            rule_id=self.rule_id,
-            node_type=node.node_type,
-            severity=Severity.warning,
-            category=FindingCategory.performance,
-            title=f"Nested loop with {loops:,} iterations",
-            message=(
-                f"The Nested Loop join executed its inner side {loops:,} times. "
-                "For large outer relations this is O(n×m) and will be dramatically "
-                "slower than a Hash Join or Merge Join."
-            ),
-            suggestion=(
-                "Ensure the inner side of the join has an index on the join key. "
-                "You can force PostgreSQL to try alternatives with "
-                "SET enable_nestloop = off in your session for benchmarking."
-            ),
-        )]
+        return [
+            PlanFinding(
+                rule_id=self.rule_id,
+                node_type=node.node_type,
+                severity=Severity.warning,
+                category=FindingCategory.performance,
+                title=f"Nested loop with {loops:,} iterations",
+                message=(
+                    f"The Nested Loop join executed its inner side {loops:,} times. "
+                    "For large outer relations this is O(n×m) and will be dramatically "
+                    "slower than a Hash Join or Merge Join."
+                ),
+                suggestion=(
+                    "Ensure the inner side of the join has an index on the join key. "
+                    "You can force PostgreSQL to try alternatives with "
+                    "SET enable_nestloop = off in your session for benchmarking."
+                ),
+            )
+        ]
 
 
 PLAN_RULE_REGISTRY: list[PlanRule] = [

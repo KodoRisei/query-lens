@@ -1,10 +1,13 @@
 import json
 
-import pytest
-
 from app.ai.base import LLMResponse
 from app.ai.response_parser import AIResponseParser
-from app.domain.models.analysis import AnalysisFinding, FindingCategory, Severity, StaticAnalysisResult
+from app.domain.models.analysis import (
+    AnalysisFinding,
+    FindingCategory,
+    Severity,
+    StaticAnalysisResult,
+)
 
 parser = AIResponseParser()
 
@@ -58,7 +61,12 @@ def test_parses_bare_json():
 
 
 def test_parses_json_in_code_fence():
-    payload = {"summary": "All good.", "findings": [], "improved_query": None, "educational_note": None}
+    payload = {
+        "summary": "All good.",
+        "findings": [],
+        "improved_query": None,
+        "educational_note": None,
+    }
     content = f"```json\n{json.dumps(payload)}\n```"
     review = parser.parse(make_response(content), empty_analysis())
     assert review.summary == "All good."
@@ -78,7 +86,12 @@ def test_fallback_on_malformed_json():
 def test_empty_findings_with_static_fallback():
     # When LLM returns no findings but static analysis has them,
     # the parser should synthesize findings from the static result.
-    payload = {"summary": "Reviewed.", "findings": [], "improved_query": None, "educational_note": None}
+    payload = {
+        "summary": "Reviewed.",
+        "findings": [],
+        "improved_query": None,
+        "educational_note": None,
+    }
     review = parser.parse(make_response(json.dumps(payload)), analysis_with_finding())
     assert len(review.findings) == 1
     assert review.findings[0].rule_id == "select_star"

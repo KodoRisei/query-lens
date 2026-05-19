@@ -1,7 +1,11 @@
 from app.ai.base import LLMProvider
 from app.ai.prompts.builder import PromptBuilder
 from app.ai.response_parser import AIResponseParser
-from app.analysis.execution_plan import ExecutionPlanAnalyzer, ExecutionPlanResult, ExplainAnalyzeRunner
+from app.analysis.execution_plan import (
+    ExecutionPlanAnalyzer,
+    ExecutionPlanResult,
+    ExplainAnalyzeRunner,
+)
 from app.analysis.static_analyzer import StaticAnalyzer
 from app.core.exceptions import ExecutionPlanError
 from app.core.logging import get_logger
@@ -62,9 +66,7 @@ class QueryReviewService:
 
         plan_result = await self._run_explain(query.sql, static_result.query_type)
 
-        messages = self._prompt_builder.build_review_messages(
-            query, static_result, plan_result
-        )
+        messages = self._prompt_builder.build_review_messages(query, static_result, plan_result)
         llm_response = await self._provider.complete(messages)
         ai_review = self._response_parser.parse(llm_response, static_result)
 
@@ -84,9 +86,7 @@ class QueryReviewService:
             execution_plan=plan_result,
         )
 
-    async def _run_explain(
-        self, sql: str, query_type: str
-    ) -> ExecutionPlanResult | None:
+    async def _run_explain(self, sql: str, query_type: str) -> ExecutionPlanResult | None:
         if self._plan_runner is None:
             return None
 

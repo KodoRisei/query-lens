@@ -1,7 +1,10 @@
-import pytest
-
 from app.ai.prompts.builder import PromptBuilder
-from app.domain.models.analysis import AnalysisFinding, FindingCategory, Severity, StaticAnalysisResult
+from app.domain.models.analysis import (
+    AnalysisFinding,
+    FindingCategory,
+    Severity,
+    StaticAnalysisResult,
+)
 from app.domain.models.query import ReviewMode, SQLQuery
 
 builder = PromptBuilder()
