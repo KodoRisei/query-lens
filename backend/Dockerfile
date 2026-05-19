@@ -10,15 +10,13 @@ WORKDIR /app
 # ---- deps stage ----
 FROM base AS deps
 
-RUN pip install hatch
+RUN pip install hatchling
 COPY pyproject.toml .
-RUN pip install --no-deps $(python -c "
-import tomllib
-with open('pyproject.toml', 'rb') as f:
-    data = tomllib.load(f)
-deps = data['project']['dependencies']
-print(' '.join(f'\"{d}\"' for d in deps))
-")
+RUN python3 -c "\
+import tomllib, subprocess; \
+data = tomllib.load(open('pyproject.toml', 'rb')); \
+deps = data['project']['dependencies']; \
+subprocess.run(['pip', 'install', '--no-cache-dir'] + deps, check=True)"
 
 # ---- runtime stage ----
 FROM base AS runtime
