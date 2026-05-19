@@ -54,7 +54,7 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
-    entrypoint: ["ollama", "pull", "llama3.1"]
+    entrypoint: ["ollama", "pull", "llama3.2:1b"]
     restart: "no"
 
   backend:
