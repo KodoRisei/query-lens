@@ -51,6 +51,7 @@ async def create_review(
         sql=request.sql,
         dialect=request.dialect,
         review_mode=request.review_mode,
+        language=request.language,
     )
 
     review = await service.review(query)

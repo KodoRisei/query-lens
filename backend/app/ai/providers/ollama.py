@@ -47,7 +47,7 @@ class OllamaProvider:
         messages: list[Message],
         *,
         temperature: float = 0.3,
-        max_tokens: int = 2048,
+        max_tokens: int = 512,
     ) -> LLMResponse:
         try:
             response = await self._client.chat.completions.create(

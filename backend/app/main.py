@@ -17,7 +17,8 @@ from app.core.exceptions import (
     SQLParseError,
 )
 from app.core.logging import configure_logging
-from app.infrastructure.database.connection import dispose_engine
+from app.infrastructure.database.connection import dispose_engine, get_engine
+from app.infrastructure.database.models import Base
 
 configure_logging()
 logger = structlog.get_logger(__name__)
@@ -31,6 +32,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         environment=settings.environment,
         debug=settings.debug,
     )
+    async with get_engine().begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("database.tables.created")
     yield
     await dispose_engine()
     logger.info("application.shutdown")

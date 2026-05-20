@@ -19,6 +19,11 @@ class PromptBuilder:
     can be tested, versioned, and swapped independently of the LLM client.
     """
 
+    _LANGUAGE_INSTRUCTIONS: dict[str, str] = {
+        "ja": "必ず日本語で回答してください。",
+        "en": "",
+    }
+
     def build_review_messages(
         self,
         query: SQLQuery,
@@ -26,6 +31,9 @@ class PromptBuilder:
         plan_result: ExecutionPlanResult | None = None,
     ) -> list[Message]:
         system = SYSTEM_PROMPTS[query.review_mode]
+        lang = self._LANGUAGE_INSTRUCTIONS.get(query.language, "")
+        if lang:
+            system = f"{system} {lang}"
         user = self._build_user_message(query, analysis, plan_result)
         return [
             Message(role="system", content=system),
@@ -49,12 +57,11 @@ class PromptBuilder:
         parts.append("")
         parts.append("## Static Analysis Findings")
         if analysis.findings:
-            parts.append(self._format_static_findings(analysis.findings))
+            parts.append(self._format_static_findings(analysis.findings[:5]))
+            if len(analysis.findings) > 5:
+                parts.append(f"_…and {len(analysis.findings) - 5} more findings._")
         else:
-            parts.append(
-                "_No anti-patterns detected by static analysis. "
-                "Review for readability, correctness, and edge cases._"
-            )
+            parts.append("_No anti-patterns detected._")
 
         if plan_result is not None:
             parts.append("")
@@ -89,7 +96,7 @@ class PromptBuilder:
 
         if plan_result.findings:
             lines.append("")
-            for i, f in enumerate(plan_result.findings, 1):
+            for i, f in enumerate(plan_result.findings[:3], 1):
                 lines.append(
                     f"{i}. **[{f.severity.upper()}] {f.title}** (`{f.rule_id}`)\n   {f.message}"
                 )
