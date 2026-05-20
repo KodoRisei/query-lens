@@ -76,14 +76,17 @@ class AIResponseParser:
         response: LLMResponse,
         analysis: StaticAnalysisResult,
     ) -> AIReview:
+        raw_findings = data.get("findings")
+        if not isinstance(raw_findings, list):
+            raw_findings = []
         findings = [
             AIFinding(
-                rule_id=str(f.get("rule_id", "ai_detected")),
-                explanation=str(f.get("explanation", "")),
-                suggestion=f.get("suggestion") or None,
+                rule_id=str(f.get("rule_id") or "ai_detected"),
+                explanation=str(f.get("explanation") or f.get("message") or ""),
+                suggestion=f.get("suggestion") or f.get("fix") or None,
             )
-            for f in (data.get("findings") or [])
-            if f.get("explanation")
+            for f in raw_findings
+            if isinstance(f, dict) and (f.get("explanation") or f.get("message"))
         ]
 
         # If the LLM returned no findings but static analysis found some,

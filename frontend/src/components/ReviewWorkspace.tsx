@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { createReview, ApiError } from "@/lib/api";
 import type { QueryReview, ReviewMode, Language } from "@/types/review";
@@ -34,20 +34,35 @@ const MODES: { value: ReviewMode; label: string; description: string }[] = [
   },
 ];
 
-const PLACEHOLDER_SQL = `-- Paste your SQL query here and click "Review"
-SELECT u.id, u.name, o.total
-FROM users u, orders o
-WHERE u.id = o.user_id
-  AND u.name LIKE '%admin%'
-ORDER BY o.total DESC`;
+const LOADING_STEPS = [
+  "Running static analysis…",
+  "Running EXPLAIN ANALYZE…",
+  "Asking AI…",
+];
+
+const PLACEHOLDER_SQL = `-- game1 スキーマのサンプルクエリ（そのままReviewできます）
+SELECT *
+FROM game1.user_m u, game1.login_log l
+WHERE u.user_id = l.user_id
+  AND u.country_code LIKE '%JP%'
+ORDER BY l.create_time DESC`;
 
 export default function ReviewWorkspace() {
   const [sql, setSql] = useState(PLACEHOLDER_SQL);
   const [reviewMode, setReviewMode] = useState<ReviewMode>("senior");
   const [language, setLanguage] = useState<Language>("en");
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<QueryReview | null>(null);
+
+  useEffect(() => {
+    if (!loading) { setLoadingStep(0); return; }
+    // Rough timing: static(<1s) → EXPLAIN(<5s) → AI(5s+)
+    const t1 = setTimeout(() => setLoadingStep(1), 800);
+    const t2 = setTimeout(() => setLoadingStep(2), 5500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -133,26 +148,11 @@ export default function ReviewWorkspace() {
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <svg
-                  className="animate-spin w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  />
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                Reviewing…
+                {LOADING_STEPS[loadingStep]}
               </span>
             ) : (
               "Review Query"
