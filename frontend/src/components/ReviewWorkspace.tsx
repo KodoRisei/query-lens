@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import clsx from "clsx";
 import { createReview, ApiError } from "@/lib/api";
-import type { QueryReview, ReviewMode } from "@/types/review";
+import type { QueryReview, ReviewMode, Language } from "@/types/review";
 import StaticAnalysisCard from "./StaticAnalysisCard";
 import AiReviewCard from "./AiReviewCard";
 import ExecutionPlanCard from "./ExecutionPlanCard";
@@ -44,6 +44,7 @@ ORDER BY o.total DESC`;
 export default function ReviewWorkspace() {
   const [sql, setSql] = useState(PLACEHOLDER_SQL);
   const [reviewMode, setReviewMode] = useState<ReviewMode>("senior");
+  const [language, setLanguage] = useState<Language>("en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<QueryReview | null>(null);
@@ -54,7 +55,7 @@ export default function ReviewWorkspace() {
     setLoading(true);
     setError(null);
     try {
-      const result = await createReview({ sql: sql.trim(), review_mode: reviewMode });
+      const result = await createReview({ sql: sql.trim(), review_mode: reviewMode, language });
       setReview(result);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -97,6 +98,25 @@ export default function ReviewWorkspace() {
                 )}
               >
                 {mode.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Language toggle */}
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-800 border border-slate-700">
+            {(["en", "ja"] as Language[]).map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => setLanguage(lang)}
+                className={clsx(
+                  "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  language === lang
+                    ? "bg-slate-600 text-white"
+                    : "text-slate-400 hover:text-slate-200",
+                )}
+              >
+                {lang === "en" ? "EN" : "日本語"}
               </button>
             ))}
           </div>

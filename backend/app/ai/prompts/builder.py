@@ -19,6 +19,11 @@ class PromptBuilder:
     can be tested, versioned, and swapped independently of the LLM client.
     """
 
+    _LANGUAGE_INSTRUCTIONS: dict[str, str] = {
+        "ja": "必ず日本語で回答してください。",
+        "en": "",
+    }
+
     def build_review_messages(
         self,
         query: SQLQuery,
@@ -26,6 +31,9 @@ class PromptBuilder:
         plan_result: ExecutionPlanResult | None = None,
     ) -> list[Message]:
         system = SYSTEM_PROMPTS[query.review_mode]
+        lang = self._LANGUAGE_INSTRUCTIONS.get(query.language, "")
+        if lang:
+            system = f"{system} {lang}"
         user = self._build_user_message(query, analysis, plan_result)
         return [
             Message(role="system", content=system),

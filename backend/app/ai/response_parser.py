@@ -45,17 +45,26 @@ class AIResponseParser:
             return self._fallback(response, raw)
 
     def _extract_json(self, text: str) -> dict[str, Any] | None:
-        # Try bare JSON first (most common with json_object response format)
+        # 1. Bare JSON (ideal path)
         try:
             return json.loads(text)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             pass
 
-        # Try extracting from a code fence
+        # 2. JSON inside a markdown code fence
         match = _JSON_FENCE_RE.search(text)
         if match:
             try:
                 return json.loads(match.group(1).strip())  # type: ignore[no-any-return]
+            except json.JSONDecodeError:
+                pass
+
+        # 3. First {...} block embedded in surrounding text (common with small local models)
+        brace_start = text.find("{")
+        brace_end = text.rfind("}")
+        if brace_start != -1 and brace_end > brace_start:
+            try:
+                return json.loads(text[brace_start : brace_end + 1])  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 pass
 

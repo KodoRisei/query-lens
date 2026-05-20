@@ -13,3 +13,4 @@ class SQLQuery:
     sql: str
     dialect: str = ""
     review_mode: ReviewMode = ReviewMode.senior
+    language: str = "en"

@@ -69,10 +69,13 @@ export interface QueryReview {
   created_at: string;
 }
 
+export type Language = "en" | "ja";
+
 export interface ReviewRequest {
   sql: string;
   dialect?: string;
   review_mode?: ReviewMode;
+  language?: Language;
   provider?: string;
 }
 
