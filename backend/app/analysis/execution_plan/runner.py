@@ -45,11 +45,13 @@ class ExplainAnalyzeRunner:
                 timeout=self._timeout_seconds,
             )
         except TimeoutError as exc:
+            await self._session.rollback()
             raise ExecutionPlanError(
                 message=f"EXPLAIN ANALYZE timed out after {self._timeout_seconds}s.",
                 details={"timeout_seconds": self._timeout_seconds},
             ) from exc
         except Exception as exc:
+            await self._session.rollback()
             raise ExecutionPlanError(
                 message=f"EXPLAIN ANALYZE failed: {exc}",
             ) from exc
