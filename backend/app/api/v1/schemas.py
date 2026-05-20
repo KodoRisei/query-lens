@@ -17,7 +17,9 @@ class ReviewRequest(BaseModel):
         default="", pattern=r"^[a-z_]*$", description="sqlglot dialect (empty = generic SQL)"
     )
     review_mode: ReviewMode = Field(default=ReviewMode.senior)
-    language: str = Field(default="en", pattern=r"^[a-z]{2}$", description="Response language (en, ja, …)")
+    language: str = Field(
+        default="en", pattern=r"^[a-z]{2}$", description="Response language (en, ja, …)"
+    )
     provider: LLMProviderName | None = Field(
         default=None, description="Override default LLM provider"
     )
