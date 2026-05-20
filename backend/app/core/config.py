@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2:1b"
 
     # Analysis
-    explain_analyze_timeout_seconds: int = 30
+    explain_analyze_timeout_seconds: int = 5
     max_query_length: int = 50_000
 
     @field_validator("log_level")
